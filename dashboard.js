@@ -2,48 +2,32 @@
 
 
 
+
+
+
 // global variables
-let storedTasks = {}
-let totalTasksNumber = 0;
-let lastCreatedTask;
+let storedTasks = JSON.parse(localStorage.getItem('storedTasks')) ?? [];
+let currentIndex;
 let updating = false;
 
-const tasksContainer = document.querySelector('.tasks-container');
-
-function restoreStoredTasks() {
-	const retrievedTasks = JSON.parse(localStorage.getItem('storedTasks'));
-	for (const key of Object.keys(retrievedTasks)) {
-		const title = retrievedTasks[key]["title"];
-		const paragraph = retrievedTasks[key]["paragraph"];
-		const done = retrievedTasks[key]["done"];
-		createTask(true, title, paragraph, done);
-	}
-}
-
-const createTaskBtn = document.querySelector('.create-task');
-createTaskBtn.addEventListener('click', function() {
-	createTask(false);
-});
-
-function createTask(restoring, title, paragraph, done) {
-	totalTasksNumber++;
-	let taskId = totalTasksNumber;
-	console.log('creating task number:', taskId);
-	if (restoring) {
-		let task = makeTaskBoilerplate(taskId, title, paragraph, done);
-		storeTaskData(taskId, title, paragraph, done);
+function displayAllTasks() {
+	tasksContainer.innerHTML = '';
+	const storedTasksLength = storedTasks.length;
+	for (let i = 0; i < storedTasksLength; i++) {
+		const taskId = i;
+		const currentTask = storedTasks[i];
+		const title = currentTask["title"];
+		const paragraph = currentTask["paragraph"];
+		const done = currentTask["done"];
+		const task = createTask(taskId, title, paragraph, done);
 		appendTask(task);
-	} else {
-		let task = makeTaskBoilerplate(taskId, "", "", false);
-		lastCreatedTask = task;
-		showTaskPrompt();
 	}
 }
 
-function makeTaskBoilerplate(id, title, paragraph, done) {
+function createTask(id, title, paragraph, done) {
 	// task boilerplate
 	const task = document.createElement('div');
-	task.setAttribute('id', id);
+	task.setAttribute('id', `task${id}`);
 	task.classList.add('fat-button', 'task');
 
 	const taskText = document.createElement('div');
@@ -81,122 +65,112 @@ function makeTaskBoilerplate(id, title, paragraph, done) {
 		let fatButtonClickedNoTransfrom = 'fat-button-clicked-no-transform';
 		let fatButtonClicked = 'fat-button-clicked';
 		task.classList.add(`${fatButtonClicked}`);
+
 		taskText.classList.add(`${fatButtonClickedNoTransfrom}`);
 		deleteBtn.classList.add(`${fatButtonClickedNoTransfrom}`);
 		editBtn.classList.add(`${fatButtonClickedNoTransfrom}`);
 	}
-
 	// adding functionalities
 	task.addEventListener('click', function(event) {
-		lastCreatedTask = event.target.closest('.task');
+		currentIndex = parseInt(((event.target.closest('.task')).getAttribute('id')).slice(4));
+		let task = event.target.closest('.task');
+
 	    if (event.target.closest('.delete-task')) {
-	        deleteTask(event.target.closest('.task'));
+	        deleteTask(currentIndex);
+	        rewriteStoredTasks();
+	        displayAllTasks();
 	    } else if (event.target.closest('.edit-task')) {
-	    	showTaskPrompt();
+	    	showTaskPrompt(task);
 	    } else if (event.target.closest('.task-text')) {
-	    	doneUndone(event.target.closest('.task'));
+	    	toggleDone(currentIndex, task);
+	    	rewriteStoredTasks();
 	    }
 	});
-
 	return task;
 }
 
-function storeTaskData(id, title, paragraph, done) {
-	console.log('storing data');
-	storedTasks[id] = {};
-	storedTasks[id]["title"] = title;
-	storedTasks[id]["paragraph"] = paragraph;
-	if (done !== undefined) {
-		storedTasks[id]["done"] = done;
-	}
-}
+function toggleDone(index, task) {
+	storedTasks[index]["done"] = !(storedTasks[index]["done"]);
 
-function appendTask(task) {
-	tasksContainer.appendChild(task);
-}
-
-// checking which input values should I use
-function showTaskPrompt() {
-	const header = lastCreatedTask.querySelector('h1').innerText;
-	const paragraph = lastCreatedTask.querySelector('p').innerText;
-
-	if (header !== '' && paragraph !== '') {
-		updating = true;
-		taskTitle.value = header;
-		taskParagraph.value = paragraph;
-	} else {
-		updating = false;
-	}
-	// lastCreatedTask = task;
-	taskPrompt.style.display = 'block';
-}
-
-const taskPrompt = document.querySelector('.task-prompt');
-const taskTitle = document.querySelector('.title-input')
-const taskParagraph = document.querySelector('.paragraph-input')
-const confirmPrompt = document.querySelector('.confirm-prompt');
-const cancelPrompt = document.querySelector('.cancel-prompt')
-
-confirmPrompt.addEventListener('click', function() {
-	editTask();
-});
-cancelPrompt.addEventListener('click', function() {
-	hideTaskPrompt();
-});
-
-function editTask() {
-	console.log(storedTasks);
-
-	const taskId = lastCreatedTask.getAttribute('id');
-	const title = taskTitle.value;
-	const paragraph = taskParagraph.value;
-
-	lastCreatedTask.querySelector('h1').innerText = title;
-	lastCreatedTask.querySelector('p').innerText = paragraph;
-
-	if (!updating) {
-		storeTaskData(taskId, title, paragraph, false);
-		appendTask(lastCreatedTask);
-	} else {
-		storeTaskData(taskId, title, paragraph)	
-	}
-	rewriteLocalStorage();
-
-	hideTaskPrompt();
-	// emptying the inputs fields
-	taskTitle.value = '';
-	taskParagraph.value = '';
-}
-
-function doneUndone (task) {
 	task.classList.toggle('fat-button-clicked');
 	const allFatButtons = task.querySelectorAll('.fat-button');
 	for (const fatButton of allFatButtons) {
 		fatButton.classList.toggle('fat-button-clicked-no-transform');
 	}
-	storedTasks[task.getAttribute('id')]["done"] = !(storedTasks[task.getAttribute('id')]["done"]);
-	rewriteLocalStorage();
 }
 
-function hideTaskPrompt() {
+const tasksContainer = document.querySelector('.tasks-container');
+
+function appendTask(task) {
+	tasksContainer.appendChild(task);
+}
+
+const createTaskBtn = document.querySelector('.create-task');
+createTaskBtn.addEventListener('click', function() {
+	showTaskPrompt();
+});
+const taskPrompt = document.querySelector('.task-prompt');
+const taskTitle = document.querySelector('.title-input')
+const taskParagraph = document.querySelector('.paragraph-input')
+const confirmPrompt = document.querySelector('.confirm-prompt');
+const cancelPrompt = document.querySelector('.cancel-prompt');
+confirmPrompt.addEventListener('click', function() {
+	const title = taskTitle.value;
+	const paragraph = taskParagraph.value;
 	if (updating) {
-		totalTasksNumber--;
+		// console.log('updating', updating, currentIndex, title, paragraph);
+		storeTask(currentIndex, title, paragraph);
+		hideTaskPrompt();
+	} else if (!updating) {
+		// console.log('making new task', updating, title, paragraph);
+		storeTask(false, title, paragraph);
+		hideTaskPrompt();
 	}
-	taskPrompt.style.display = 'none';
-	taskTitle.value = '';
-	taskParagraph.value = '';
+	rewriteStoredTasks();
+	displayAllTasks();
+});
+cancelPrompt.addEventListener('click', hideTaskPrompt);
+
+function showTaskPrompt(task) {
+	taskPrompt.style.display = 'block';
+	if (task === undefined) {
+		updating = false;
+		taskTitle.value = '';
+		taskParagraph.value = '';
+	} else {
+		updating = true;
+		taskTitle.value = task.querySelector('h1').innerText;
+		taskParagraph.value = task.querySelector('p').innerText;
+	}
 }
 
-function deleteTask(task) {
-	tasksContainer.removeChild(task);
-	delete storedTasks[task.getAttribute('id')];
-	rewriteLocalStorage();
+function storeTask(index, title, paragraph) {
+	console.log(index, title, paragraph);
+	if (index !== false) {
+		const task = storedTasks[index];
+		task["title"] = title;
+		task["paragraph"] = paragraph;
+	} else {
+		const newTask = {
+			"title": title,
+			"paragraph": paragraph,
+			"done": false
+		};
+		storedTasks.push(newTask);
+	}
 }
 
-function rewriteLocalStorage() {
+function rewriteStoredTasks() {
 	localStorage.clear();
 	localStorage.setItem('storedTasks', JSON.stringify(storedTasks));
 }
 
-// functions to call when the script gets called
-restoreStoredTasks()
+function hideTaskPrompt() {
+	taskPrompt.style.display = 'none';
+}
+
+function deleteTask(index) {
+	storedTasks.splice(index, 1);	
+}
+
+displayAllTasks();
