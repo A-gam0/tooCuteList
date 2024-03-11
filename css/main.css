@@ -34,6 +34,7 @@ body {
     font-family: "Rubik", sans-serif;
     margin: 0;
     background-color: var(--bg-clr);
+    position: relative;
 }
 
 h1 {
@@ -87,11 +88,58 @@ p {
 }
 
 /*top section*/
+
+.top-section {
+    position: relative;
+}
+
+.menu {
+    display: none;
+    padding: 12% 1em;
+    background-color: lightcoral;
+    border-radius: 0 0 10px 10px;
+ 
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1;
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+}
+
+@media(min-width: 500px) {
+    .menu {
+        border-radius: 10px;
+        left: 1em;
+        right: 1em;
+    }
+}
+
+
+/*the perfect rate first 12% then 6em */
+@media(min-width:930px) {
+    .menu {
+        padding: 6em 1em;
+    }
+}
+
+.menu > * {
+    width: 300px;
+    font-weight: bold;
+    text-transforM: capitalize;
+}
+
 .top-section {
     background-color: var(--secondary-clr-light);
 }
 
 header {
+    position: relative;
+    z-index: 2;
     max-width: 800px;
     padding: .5em 1em 1em 1em;
     margin: 0 auto;
@@ -235,6 +283,7 @@ footer .github-anchor i {
 .fat-button {
     padding: .75em;
 
+    text-align: center;
     border: 2px solid var(--primary-clr);
     background-color: var(--secondary-clr-light);
     color: var(--primary-clr);
@@ -276,4 +325,10 @@ footer .github-anchor i {
     color: var(--primary-clr-light);
     box-shadow: none;
     transform: translate(5px, 5px);   
+}
+
+
+/*general*/
+.show-item--flex {
+    display: flex;
 }
