@@ -3,14 +3,12 @@
 
 .task-prompt{
     display: none;
-
     padding: 1em;
-
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    z-index: 2;
+    z-index: 999;
 }
 
 .task-prompt input {

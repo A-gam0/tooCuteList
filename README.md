@@ -1,8 +1,9 @@
 ### Visit The Website on => *[tooCuteList](https://toocutelist.netlify.app/)*.
 ## Urgent Problems:
-- [ ] make the focus on the title of the prompt when it shows up
-- [ ] the logo goes right when the 'menu' button changes it's text to 'close' since it's somehow shorter
-- [ ] add the tab title in the head + check missing meta tags
+- [x] used dvh on body's height to display the github account
+- [x] make the focus on the title of the prompt when it shows up
+- [x] the logo goes right when the 'menu' button changes it's text to 'close' since it's somehow shorter
+- [x] add the tab title in the head + check missing meta tags
 ## Problems to Solve:
 - [ ] Change the carousel tasks areas, they look awful
 - [ ] Made another uneccessary div for the carousel overflow
@@ -24,5 +25,22 @@
 - [ ] repeatable tasks
 - [ ] remove all tasks button
 
-
+## Boilerplates:
+- task
+```html
+<div class="fat-button trans--effect task example-task">
+    <div class="fat-button no-trans--effect click--effect task-text">
+        <h1>example task</h1>
+        <p>This is the description of the example task</p>
+    </div>
+    <div class="task-btns">
+        <button class="fat-button no-trans-effect click--effect delete-task">
+            <i class="fa-regular fa-trash-can"></i>
+        </button>
+        <button class="fat-button no-trans-effect click--effect edit-task">
+            <i class="fa-regular fa-pen-to-square"></i>
+        </button>
+    </div>
+</div>
+```
 
